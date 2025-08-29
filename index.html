@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSU Spray Pattern Calculator</title>
+    <style>
+        :root {
+            --msu-blue: #003d7d;
+            --msu-gold: #f4c242;
+            --msu-dark-blue: #002e5f;
+            --light-blue: #e0f0ff;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        
+        .header {
+            background-color: var(--msu-blue);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+        
+        .header .logo {
+            position: absolute;
+            left: 20px;
+            top: 15px;
+            height: 60px;
+        }
+        
+        .header .tagline {
+            font-size: 1em;
+            margin-top: 5px;
+            color: var(--msu-gold);
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .intro {
+            background-color: white;
+            border-left: 5px solid var(--msu-gold);
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-panel {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .control-panel h2 {
+            color: var(--msu-blue);
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--msu-gold);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            position: relative; /* Needed for tooltip positioning */
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--msu-dark-blue);
+        }
+        
+        .info-button {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--msu-gold);
+            color: var(--msu-dark-blue);
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 18px;
+            cursor: help;
+            margin-left: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tooltip {
+            visibility: hidden;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 10px;
+            position: absolute;
+            z-index: 100; /* Higher z-index to ensure it's on top */
+            bottom: 100%; /* Position above the button */
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 10px; /* Space between button and tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+            width: 200px; /* Adjust width as needed */
+            font-size: 0.85em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            text-align: left; /* Allow text to wrap naturally */
+            white-space: normal; /* Allow text to wrap */
+        }
+        
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+        
+        .info-button:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--msu-gold);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(244, 194, 66, 0.3);
+        }
+        
+        .unit-toggle {
+            display: flex;
+            margin-bottom: 20px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .unit-toggle button {
+            flex: 1;
+            background-color: #e4e4e4;
+            color: #555;
+            padding: 8px 12px;
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            font-size: 14px;
+        }
+        
+        .unit-toggle button.active {
+            background-color: var(--msu-gold);
+            color: var(--msu-dark-blue);
+            font-weight: bold;
+        }
+        
+        .results-panel {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .results-panel h2 {
+            color: var(--msu-blue);
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--msu-gold);
+        }
+        
+        .result-value {
+            font-weight: bold;
+            color: var(--msu-blue);
+        }
+        
+        .visualization-panel {
+            flex: 2;
+            min-width: 500px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .visualization-panel h2 {
+            color: var(--msu-blue);
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--msu-gold);
+            text-align: center;
+        }
+        
+        .spray-area {
+            width: 100%;
+            height: 400px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        
+        .overlap-indicator {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--msu-blue);
+        }
+        
+        /* Base spray pattern outline */
+        .spray-pattern {
+            fill: none; /* No fill for the base dashed pattern */
+            stroke: rgba(244, 194, 66, 0.8); /* Orange stroke */
+            stroke-width: 1;
+            stroke-dasharray: 5 5; /* Dashed line */
+        }
+
+        /* Area covered by exactly two sprays (now used for the single overlap area) */
+        .spray-overlap-highlight {
+            fill: rgba(0, 61, 125, 0.2); /* Lighter blue for overlap */
+            stroke: none; /* No stroke */
+        }
+        
+        .ground {
+            fill: #8FBC8F; /* Darker green */
+            stroke: #3a6e3a;
+            stroke-width: 1;
+        }
+        
+        .boom {
+            fill: #444;
+            stroke: #222;
+            stroke-width: 1;
+        }
+        
+        .nozzle-body {
+            fill: #666;
+            stroke: #333;
+            stroke-width: 1;
+        }
+
+        .nozzle-number {
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            fill: #333; /* Default color */
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+
+        /* Removed .nozzle-number.highlighted as per user's reference image */
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border: 1px solid #999;
+        }
+        
+        .legend-spray {
+            background-color: transparent; /* No fill */
+            border-style: dashed;
+            border-width: 1px;
+            border-color: rgba(244, 194, 66, 0.8);
+        }
+        
+        .legend-overlap-highlight { 
+            background-color: rgba(0, 61, 125, 0.2);
+        }
+        
+        .key-stats {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            gap: 10px;
+        }
+        
+        .stat-box {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background-color: var(--light-blue);
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--msu-blue);
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .table-container {
+            margin-top: 15px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--msu-blue);
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--msu-blue);
+            color: white;
+        }
+        
+        .footer a {
+            color: var(--msu-gold);
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .applications-table { /* This table is now removed from HTML, but styles kept in case needed */
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .applications-table th {
+            background-color: var(--msu-blue);
+            color: white;
+            padding: 8px;
+        }
+
+        .applications-table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .applications-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        @media screen and (max-width: 768px) {
+            .control-panel, .results-panel, .visualization-panel {
+                min-width: 100%;
+            }
+        }
+
+        /* Plant SVG styles */
+        .plant-leaf {
+            fill: #4CAF50; /* Green */
+        }
+        .plant-stem {
+            fill: #8BC34A; /* Lighter green */
+        }
+
+        /* Summary Section Styles */
+        .summary-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px; 
+        }
+
+        .summary-section h2 {
+            color: var(--msu-blue);
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--msu-gold);
+        }
+
+        .summary-section h3 {
+            color: var(--msu-dark-blue);
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .summary-section p, .summary-section ul, .summary-section table {
+            margin-bottom: 10px;
+        }
+
+        .summary-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .summary-section th, .summary-section td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .summary-section th {
+            background-color: var(--light-blue);
+            color: var(--msu-dark-blue);
+        }
+
+        /* Styles for summary text within SVG */
+        .svg-summary-text {
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+            fill: #333;
+            font-weight: bold;
+        }
+        .recommendation-good {
+            color: green;
+            font-weight: bold;
+        }
+        .recommendation-high {
+            color: orange;
+            font-weight: bold;
+        }
+        .recommendation-low, .recommendation-gap {
+            color: red;
+            font-weight: bold;
+        }
+        .application-rate-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .application-rate-table th, .application-rate-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .application-rate-table th {
+            background-color: var(--msu-blue);
+            color: white;
+        }
+        .application-rate-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 900px;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+            line-height: 1.6;
+            z-index: 1001;
+        }
+
+        .modal-close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            color: #333;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        .modal-close-button:hover {
+            color: var(--msu-gold);
+        }
+
+        /* Styling for documentation content within modal */
+        .modal-content h1 {
+            color: var(--msu-blue);
+            border-bottom: 2px solid var(--msu-gold);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .modal-content h2 {
+            color: var(--msu-blue);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 25px;
+        }
+        .modal-content h3 {
+            color: var(--msu-dark-blue);
+            margin-top: 15px;
+        }
+        .modal-content pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-left: 3px solid var(--msu-gold);
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 15px;
+        }
+        .modal-content ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .modal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .modal-content table th, .modal-content table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .modal-content table th {
+            background-color: var(--light-blue);
+            color: var(--msu-dark-blue);
+        }
+
+        /* New Summary Card Styles */
+        .summary-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .summary-card h2 {
+            color: var(--msu-blue);
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--msu-gold);
+        }
+
+        .summary-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-metric-item {
+            flex: 1;
+            min-width: 180px;
+            padding: 10px;
+            text-align: center;
+            font-size: 1.1em;
+            color: var(--msu-dark-blue);
+            position: relative;
+        }
+
+        .summary-metric-value {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+        .status-green { color: #28a745; } /* Green checkmark */
+        .status-yellow { color: #ffc107; } /* Yellow warning */
+        .status-red { color: #dc3545; } /* Red X */
+
+        .summary-recommendations {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .summary-recommendations h3 {
+            color: var(--msu-dark-blue);
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .summary-recommendations ul {
+            list-style-type: disc;
+            margin-left: 25px;
+            padding-left: 0;
+        }
+
+        .summary-recommendations li {
+            margin-bottom: 8px;
+        }
+
+        .summary-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .summary-buttons button {
+            background-color: var(--msu-blue);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .summary-buttons button:hover {
+            background-color: var(--msu-dark-blue);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MSU Spray Pattern Calculator</h1>
+        <div class="tagline">Montana State University Extension</div>
+    </div>
+
+    <div class="main-container">
+        <div class="intro">
+            <p>This tool helps agricultural producers visualize and calculate spray patterns based on nozzle characteristics and boom setup. Adjust the parameters to see real-time changes in spray width, coverage, and pattern overlap.</p>
+        </div>
+
+        <div class="flex-container">
+            <div class="control-panel">
+                <h2>Spray Parameters</h2>
+                
+                <div class="unit-toggle">
+                    <button id="units-in" class="active">Inches</button>
+                    <button id="units-cm">Centimeters</button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nozzleSize">Nozzle Size:
+                        <span class="info-button">i<span class="tooltip">Indicates the flow rate in gallons per minute (GPM) at a standard pressure (typically 40 PSI). Larger sizes deliver more liquid.</span></span>
+                    </label>
+                    <select id="nozzleSize">
+                        <option value="0.1">0.1</option>
+                        <option value="0.15">0.15</option>
+                        <option value="0.2">0.2</option>
+                        <option value="0.25">0.25</option>
+                        <option value="0.3">0.3</option>
+                        <option value="0.35">0.35</option>
+                        <option value="0.4">0.4</option>
+                        <option value="0.5">0.5</option>
+                        <option value="0.6">0.6</option>
+                        <option value="0.8">0.8</option>
+                        <option value="1.0">1.0</option>
+                        <option value="1.2">1.2</option>
+                        <option value="1.25">1.25</option>
+                        <option value="1.5">1.5</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="forwardAngle">Forward Angle (°):
+                        <span class="info-button">i<span class="tooltip">Forward angle refers to the tilt of the nozzle in the direction of travel. A forward angle of 0° means the nozzle is pointed straight down, perpendicular to the ground. A positive forward angle (e.g., 10°, 20°, etc.) means the nozzle is angled forward, pointing slightly ahead of the boom line. A negative forward angle means it's angled backward, pointing slightly behind the boom.</span></span>
+                    </label>
+                    <input type="number" id="forwardAngle" value="0" min="-90" max="90" step="1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="fanAngle">Nozzle Fan Angle (°):
+                        <span class="info-button">i<span class="tooltip">The angle of the spray pattern created by the nozzle (typical values: 80°, 110°, 120°). Wider angles create broader coverage but may increase drift potential.</span></span>
+                    </label>
+                    <input type="number" id="fanAngle" value="110" min="20" max="180" step="1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="nozzleSpacing">Nozzle Spacing (<span class="spacing-unit">in</span>):
+                        <span class="info-button">i<span class="tooltip">Distance between nozzles on the spray boom. Common spacings are 20 inches or 50 cm.</span></span>
+                    </label>
+                    <input type="number" id="nozzleSpacing" value="20" min="5" step="1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="boomHeight">Boom Height (<span class="height-unit">in</span>):
+                        <span class="info-button">i<span class="tooltip">Height of spray boom above the target surface. Affects spray pattern width and overlap.</span></span>
+                    </label>
+                    <input type="number" id="boomHeight" value="20" min="5" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="operatingPressure">Operating Pressure (PSI):
+                        <span class="info-button">i<span class="tooltip">The pressure at which the spray system is operating. Affects flow rate and droplet size.</span></span>
+                    </label>
+                    <select id="operatingPressure">
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40" selected>40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                    </select>
+                </div>
+                
+            </div>
+
+            <div class="results-panel">
+                <h2>Spray Pattern Results</h2>
+                
+                <div class="key-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Spray Width
+                            <span class="info-button">i<span class="tooltip">The calculated width of the spray pattern at the target surface, based on boom height and nozzle fan angle.</span></span>
+                        </div>
+                        <div class="stat-value" id="calculatedSprayWidth">0</div>
+                        <div class="stat-label"><span class="output-width-unit">in</span></div>
+                    </div>
+                    
+                    <div class="stat-box">
+                        <div class="stat-label">Pattern Overlap
+                            <span class="info-button">i<span class="tooltip">Shows how much the spray patterns overlap. Negative values indicate gaps in coverage.</span></span>
+                        </div>
+                        <div class="stat-value" id="calculatedOverlap">0</div>
+                        <div class="stat-label">%</div>
+                    </div>
+                </div>
+                
+                <div class="summary-card" id="summaryCard">
+                    </div>
+                
+            </div>
+        </div>
+        
+        <div class="visualization-panel">
+            <h2>Spray Pattern Visualization</h2>
+            
+            <svg id="sprayVisualization" class="spray-area" width="900" height="400" viewBox="0 0 900 400">
+                </svg>
+            
+            <div class="overlap-indicator" id="visualizationOverlap">Overlap: 0%</div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-spray"></div>
+                    <div>Spray Pattern</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-overlap-highlight"></div>
+                    <div>Overlap Area</div>
+                </div>
+            </div>
+            
+            <p><small>Visualization shows spray coverage relative to the nozzle spacing. The boom height and nozzle angle affect the spray width and overlap percentage.</small></p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>For details on calculations, see the <a href="#" id="toggleDetailedCalculations">Calculation Documentation</a>.</p>
+        <p>© 2025 MSU Extension. All Rights Reserved. For educational purposes only.</p>
+        <p>Developed by MSU Extension. For questions, contact: <a href="https://agresearch.montana.edu/directory/faculty/2537306/ricardo-pinto" target="_blank">Ricardo Pinto, Precision Agriculture Research and Extension Specialist</a>.</p>
+        <p>Current Date: <span id="currentDate"></span> | Location: Northern Ag Research Center 3710 Assinniboine Road Havre, Montana 59501-8412</p>
+        <p>This calculator provides estimates and should not be solely relied upon for financial decisions. Consult with financial advisors and technical experts.</p>
+    </div>
+
+    <div id="detailedCalculationsOverlay" class="modal-overlay">
+        <div id="detailedCalculationsModal" class="modal-content">
+            <button class="modal-close-button" id="closeDetailedCalculationsModal">&times;</button>
+            <h1>Detailed Calculations</h1>
+            <p>This section provides a comprehensive breakdown of all formulas and logic used in the MSU Spray Pattern Calculator.</p>
+
+            <h2>1. Spray Width Calculation</h2>
+            <p>The spray width at the target surface is calculated geometrically based on the boom height, forward angle, and the nozzle's fan angle.</p>
+            <h3>Formula:</h3>
+            <pre><code>Spray Width = (Boom Height / COS(Forward Angle × PI()/180)) × TAN((Fan Angle/2) × PI()/180) × 2</code></pre>
+            <p><strong>Note:</strong> This formula assumes a standard flat fan spray pattern and may vary for air induction or cone nozzles.</p>
+            <p>Where:</p>
+            <ul>
+                <li><code>Boom Height</code>: The vertical distance from the nozzle to the target surface (in inches or cm, converted internally to inches for calculation).</li>
+                <li><code>Forward Angle</code>: The tilt of the nozzle in the direction of travel in degrees.</li>
+                <li><code>Fan Angle</code>: The angle of the spray pattern in degrees.</li>
+                <li><code>tan</code>: The tangent trigonometric function.</li>
+                <li><code>cos</code>: The cosine trigonometric function.</li>
+            </ul>
+
+            <h2>2. Overlap Percentage Calculation</h2>
+            <p>Overlap determines how much adjacent spray patterns cover the same area, crucial for uniform application.</p>
+            <h3>Formula:</h3>
+            <pre><code>Overlap % = (Spray Width / Nozzle Spacing) × 100 - 100</code></pre>
+            <p>Where:</p>
+            <ul>
+                <li><code>Spray Width</code>: The calculated spray width from the formula above.</li>
+                <li><code>Nozzle Spacing</code>: The distance between nozzles on the boom (in inches or cm, converted internally to inches for calculation).</li>
+            </ul>
+            <h3>Overlap Categories:</h3>
+            <ul>
+                <li>**Too Low (< 30%):** Risks missed spots and uneven coverage.</li>
+                <li>**Optimal (30-50%):** Ideal balance of coverage and efficiency.</li>
+                <li>**High (50-100%):** May cause over-application and wasted product.</li>
+                <li>**Excessive (> 100%):** Significant over-application issues.</li>
+            </ul>
+
+            <h2>3. Optimal Boom Height Recommendation</h2>
+            <p>If the calculated overlap is outside the optimal range, the calculator recommends an adjusted boom height to achieve a 40% overlap.</p>
+            <h3>Formula:</h3>
+            <pre><code>Optimal Boom Height = (Nozzle Spacing × 1.4 × COS(Forward Angle × PI()/180)) / (TAN((Fan Angle/2) × PI()/180) × 2)</code></pre>
+            <p>Where:</p>
+            <ul>
+                <li><code>Nozzle Spacing</code>: User-defined nozzle spacing.</li>
+                <li><code>1.4</code>: Factor derived from targeting 40% overlap (1 + 40/100 = 1.4).</li>
+                <li><code>Forward Angle</code>: User-defined nozzle forward angle.</li>
+                <li><code>Fan Angle</code>: User-defined nozzle fan angle.</li>
+            </ul>
+
+            <h2>4. Drift Potential Evaluation (Drift Risk Index)</h2>
+            <p>The Drift Risk Index provides a quantitative assessment of drift potential based on multiple parameters. A higher index indicates a higher risk of drift.</p>
+            <h3>Formula:</h3>
+            <pre><code>Drift Risk Index = (Boom Height ÷ Nozzle Spacing) × (Pressure Factor) × (Nozzle Size Factor) × (Fan Angle Factor)</code></pre>
+            <h3>Factors Explained:</h3>
+            <ul>
+                <li><strong>Boom Height ÷ Nozzle Spacing:</strong> A higher ratio means droplets travel further, increasing drift exposure.</li>
+                <li><strong>Pressure Factor:</strong> This factor accounts for the effect of pressure on droplet size. Higher pressure generally produces finer droplets, increasing drift risk.
+                    <ul>
+                        <li>**&lt; 40 PSI:** 0.8 (Reduces risk, coarser droplets)</li>
+                        <li>**40 PSI:** 1.0 (Standard droplet size)</li>
+                        <li>**50 PSI:** 1.1 (Slightly increases risk, finer droplets)</li>
+                        <li>**60 PSI:** 1.2 (Increases risk, finer droplets)</li>
+                        <li>**&gt; 60 PSI:** 1.3 (Significantly increases risk, very fine droplets)</li>
+                    </ul>
+                </li>
+                <li><strong>Nozzle Size Factor:</strong> This factor reflects the inherent droplet size produced by different nozzle sizes. Smaller nozzles typically produce finer droplets.
+                    <ul>
+                        <li>**0.1 - 0.2 nozzle:** 1.5 (Finer droplets, higher risk)</li>
+                        <li>**0.25 - 0.4 nozzle:** 1.0 (Standard droplet size)</li>
+                        <li>**&gt; 0.4 nozzle:** 0.8 (Coarser droplets, lower risk)</li>
+                    </ul>
+                </li>
+                <li><strong>Fan Angle Factor:</strong> This factor considers how the fan angle can influence droplet size distribution and spray pattern integrity.
+                    <ul>
+                        <li>**&lt; 90°:** 0.9 (Slightly reduces risk)</li>
+                        <li>**90°-100°:** 1.0 (Standard)</li>
+                        <li>**&gt; 100°:** 1.1 (Slightly increases risk)</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3>Drift Risk Categories:</h3>
+            <ul>
+                <li>**Low:** Drift Risk Index &lt; 0.8</li>
+                <li>**Moderate:** Drift Risk Index 0.8 - 1.5</li>
+                <li>**High:** Drift Risk Index &gt; 1.5</li>
+            </ul>
+
+            <h2>5. Application Rate Calculation</h2>
+            <p>The application rate (Gallons Per Acre - GPA) is calculated based on the nozzle's flow rate, ground speed, and nozzle spacing.</p>
+            <h3>Formulas:</h3>
+            <p><strong>a. GPM (Gallons Per Minute) at Selected PSI:</strong></p>
+            <pre><code>GPM = GPM at 40 PSI × √(Selected PSI ÷ 40)</code></pre>
+            <p>Base GPM values at 40 PSI are predefined for each nozzle size:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nozzle Size</th>
+                        <th>GPM at 40 PSI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>0.1</td><td>0.1</td></tr>
+                    <tr><td>0.15</td><td>0.15</td></tr>
+                    <tr><td>0.2</td><td>0.2</td></tr>
+                    <tr><td>0.25</td><td>0.25</td></tr>
+                    <tr><td>0.3</td><td>0.3</td></tr>
+                    <tr><td>0.35</td><td>0.35</td></tr>
+                    <tr><td>0.4</td><td>0.4</td></tr>
+                    <tr><td>0.5</td><td>0.5</td></tr>
+                    <tr><td>0.6</td><td>0.6</td></tr>
+                    <tr><td>0.8</td><td>0.8</td></tr>
+                    <tr><td>1.0</td><td>1.0</td></tr>
+                    <tr><td>1.2</td><td>1.2</td></tr>
+                    <tr><td>1.25</td><td>1.25</td></tr>
+                    <tr><td>1.5</td><td>1.5</td></tr>
+                </tbody>
+            </table>
+            <p><strong>b. GPA (Gallons Per Acre):</strong></p>
+            <pre><code>GPA = (Adjusted GPM × 5940) / (MPH × Nozzle Spacing (inches))</code></pre>
+            <p>Where:</p>
+            <ul>
+                <li><code>Adjusted GPM</code>: The GPM calculated for the selected operating pressure.</li>
+                <li><code>5940</code>: A constant used to convert units (gallons, minutes, miles, hours, inches, acres).</li>
+                <li><code>MPH</code>: Miles Per Hour (ground speed).</li>
+                <li><code>Nozzle Spacing (inches)</code>: The distance between nozzles in inches.</li>
+            </ul>
+
+            <h3>Application Volume Categories:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>GPA Range</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>&lt; 5 GPA</td><td>Ultra Low Volume</td></tr>
+                    <tr><td>5-10 GPA</td><td>Very Low Volume</td></tr>
+                    <tr><td>10-20 GPA</td><td>Low Volume</td></tr>
+                    <tr><td>20-30 GPA</td><td>Standard Volume</td></tr>
+                    <tr><td>30-50 GPA</td><td>High Volume</td></tr>
+                    <tr><td>&gt; 50 GPA</td><td>Very High Volume</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Optimal Speed Range for Common Applications:</h3>
+            <ul>
+                <li><strong>Systemic herbicides:</strong> Often effective at 10-15 GPA</li>
+                <li><strong>Contact herbicides:</strong> Often need 15-20 GPA</li>
+                <li><strong>Fungicides:</strong> Often require 20-30 GPA</li>
+                <li><strong>Insecticides:</strong> Often most effective at 20+ GPA</li>
+            </ul>
+            <p><strong>Note on Speed:</strong> Changing your speed significantly affects the application rate. Higher speeds lead to lower GPA, potentially reducing coverage quality and increasing drift due to increased turbulence. Lower speeds increase GPA, improving coverage but potentially reducing application efficiency and increasing costs. Always aim for a consistent, appropriate speed for your target application rate.</p>
+
+        </div>
+    </div>
+
+    <div id="applicationRateTableOverlay" class="modal-overlay">
+        <div id="applicationRateTableModal" class="modal-content">
+            <button class="modal-close-button" id="closeApplicationRateTableModal">&times;</button>
+            <h1>Application Rate Table</h1>
+            <p>This table shows the calculated Gallons Per Acre (GPA) at various speeds for your current nozzle and pressure settings.</p>
+            <div id="applicationRateTableContent">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUnits = 'in'; // Default to inches
+
+        // Standard GPM lookup for 40 PSI (approximate)
+        const gpmLookup40PSI = {
+            0.1: 0.1,
+            0.15: 0.15,
+            0.2: 0.2,
+            0.25: 0.25,
+            0.3: 0.3,
+            0.35: 0.35,
+            0.4: 0.4,
+            0.5: 0.5,
+            0.6: 0.6,
+            0.8: 0.8,
+            1.0: 1.0,
+            1.2: 1.2,
+            1.25: 1.25,
+            1.5: 1.5
+        };
+
+        // Nozzle specific recommendations data
+        const nozzleSpecificRecommendations = {
+            '0.1': {
+                optimalPressure: '40-60 PSI',
+                compatibleProducts: 'Herbicides, some insecticides requiring fine coverage.',
+                idealScenarios: 'Low volume applications, precise spot treatments.',
+                limitations: 'High drift potential, easily clogged, not suitable for high volume applications.'
+            },
+            '0.15': {
+                optimalPressure: '40-60 PSI',
+                compatibleProducts: 'Herbicides, insecticides.',
+                idealScenarios: 'Low to moderate volume applications.',
+                limitations: 'Moderate drift potential, can be prone to clogging.'
+            },
+            '0.2': {
+                optimalPressure: '30-50 PSI',
+                compatibleProducts: 'Most herbicides, insecticides, fungicides.',
+                idealScenarios: 'General broadcast applications, good balance of coverage and drift control.',
+                limitations: 'Can still have moderate drift at higher pressures or wind.'
+            },
+            '0.25': {
+                optimalPressure: '30-50 PSI',
+                compatibleProducts: 'Most herbicides, insecticides, fungicides.',
+                idealScenarios: 'General broadcast applications, slightly coarser droplets than 0.2.',
+                limitations: 'Similar to 0.2, but slightly better drift control.'
+            },
+            '0.3': {
+                optimalPressure: '25-45 PSI',
+                compatibleProducts: 'Most herbicides, fungicides, insecticides, some liquid fertilizers.',
+                idealScenarios: 'General broadcast applications, good drift control, common choice.',
+                limitations: 'May not provide sufficient coverage for contact products at very low volumes.'
+            },
+            '0.35': {
+                optimalPressure: '25-45 PSI',
+                compatibleProducts: 'Herbicides, fungicides, insecticides, liquid fertilizers.',
+                idealScenarios: 'Moderate to higher volume applications, good drift reduction.',
+                limitations: 'Slightly coarser droplets may reduce coverage on dense foliage.'
+            },
+            '0.4': {
+                optimalPressure: '20-40 PSI',
+                compatibleProducts: 'Herbicides (especially soil-applied), fungicides, liquid fertilizers.',
+                idealScenarios: 'Excellent drift control, higher volume applications, pre-emergent.',
+                limitations: 'Coarser droplets may reduce coverage on dense foliage or for contact products.'
+            },
+            '0.5': {
+                optimalPressure: '20-40 PSI',
+                compatibleProducts: 'Soil-applied herbicides, liquid fertilizers, some fungicides.',
+                idealScenarios: 'High volume applications, maximum drift reduction.',
+                limitations: 'Significantly coarser droplets, may not provide adequate coverage for contact products.'
+            },
+            '0.6': {
+                optimalPressure: '20-35 PSI',
+                compatibleProducts: 'Liquid fertilizers, soil-applied herbicides.',
+                idealScenarios: 'Very high volume applications, extreme drift reduction.',
+                limitations: 'Very coarse droplets, limited coverage for foliar applications.'
+            },
+            '0.8': {
+                optimalPressure: '15-30 PSI',
+                compatibleProducts: 'Liquid fertilizers, some soil-applied products.',
+                idealScenarios: 'High volume, minimal drift applications.',
+                limitations: 'Very coarse droplets, poor coverage for most foliar applications.'
+            },
+            '1.0': {
+                optimalPressure: '15-30 PSI',
+                compatibleProducts: 'Liquid fertilizers.',
+                idealScenarios: 'High volume, minimal drift applications.',
+                limitations: 'Only for very high volume applications where coverage is not critical.'
+            },
+            '1.2': {
+                optimalPressure: '15-25 PSI',
+                compatibleProducts: 'Liquid fertilizers.',
+                idealScenarios: 'High volume, minimal drift applications.',
+                limitations: 'Only for very high volume applications where coverage is not critical.'
+            },
+            '1.25': {
+                optimalPressure: '15-25 PSI',
+                compatibleProducts: 'Liquid fertilizers.',
+                idealScenarios: 'High volume, minimal drift applications.',
+                limitations: 'Only for very high volume applications where coverage is not critical.'
+            },
+            '1.5': {
+                optimalPressure: '15-25 PSI',
+                compatibleProducts: 'Liquid fertilizers.',
+                idealScenarios: 'High volume, minimal drift applications.',
+                limitations: 'Only for very high volume applications where coverage is not critical.'
+            }
+        };
+
+
+        // Initialize the calculator when the document is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set up event listeners
+            document.getElementById('units-in').addEventListener('click', () => setUnits('in'));
+            document.getElementById('units-cm').addEventListener('click', () => setUnits('cm'));
+            
+            // Add real-time update event listeners
+            const inputs = ['fanAngle', 'nozzleSpacing', 'boomHeight', 'nozzleSize', 'operatingPressure', 'forwardAngle']; 
+            inputs.forEach(inputId => {
+                document.getElementById(inputId).addEventListener('input', calculateSprayPattern);
+            });
+            
+            // Set current date in footer
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', dateOptions);
+
+            // Get modal elements
+            const detailedCalculationsOverlay = document.getElementById('detailedCalculationsOverlay');
+            const detailedCalculationsModal = document.getElementById('detailedCalculationsModal');
+            const toggleDetailedCalculationsLink = document.getElementById('toggleDetailedCalculations');
+            const closeDetailedCalculationsModalButton = document.getElementById('closeDetailedCalculationsModal');
+
+            const applicationRateTableOverlay = document.getElementById('applicationRateTableOverlay');
+            const applicationRateTableModal = document.getElementById('applicationRateTableModal');
+            const closeApplicationRateTableModalButton = document.getElementById('closeApplicationRateTableModal');
+
+            // Add event listener for Detailed Calculations toggle link
+            toggleDetailedCalculationsLink.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default anchor link behavior
+                detailedCalculationsOverlay.style.display = 'flex'; // Show overlay
+            });
+
+            // Add event listener for closing Detailed Calculations modal
+            closeDetailedCalculationsModalButton.addEventListener('click', function() {
+                detailedCalculationsOverlay.style.display = 'none'; // Hide overlay
+            });
+
+            // Close Detailed Calculations modal if clicking outside the content
+            detailedCalculationsOverlay.addEventListener('click', function(event) {
+                if (event.target === detailedCalculationsOverlay) {
+                    detailedCalculationsOverlay.style.display = 'none';
+                }
+            });
+
+            // Add event listener for Application Rate Table button (will be in summary card)
+            document.addEventListener('click', function(event) {
+                if (event.target && event.target.id === 'viewApplicationRateTableButton') {
+                    applicationRateTableOverlay.style.display = 'flex'; // Show overlay
+                    updateApplicationRateTableModal(); // Populate the table
+                }
+            });
+
+            // Add event listener for closing Application Rate Table modal
+            closeApplicationRateTableModalButton.addEventListener('click', function() {
+                applicationRateTableOverlay.style.display = 'none'; // Hide overlay
+            });
+
+            // Close Application Rate Table modal if clicking outside the content
+            applicationRateTableOverlay.addEventListener('click', function(event) {
+                if (event.target === applicationRateTableOverlay) {
+                    applicationRateTableOverlay.style.display = 'none';
+                }
+            });
+
+            // Initial calculation and visualization
+            calculateSprayPattern();
+        });
+
+        // Function to switch between units (inches and centimeters)
+        function setUnits(units) {
+            if (currentUnits === units) return; // No change needed
+
+            const nozzleSpacingInput = document.getElementById('nozzleSpacing');
+            const boomHeightInput = document.getElementById('boomHeight');
+            // operatingPressure is always PSI, no conversion needed
+
+            // Convert values
+            if (units === 'cm' && currentUnits === 'in') {
+                nozzleSpacingInput.value = (parseFloat(nozzleSpacingInput.value) * 2.54).toFixed(1);
+                boomHeightInput.value = (parseFloat(boomHeightInput.value) * 2.54).toFixed(1);
+            } else if (units === 'in' && currentUnits === 'cm') {
+                nozzleSpacingInput.value = (parseFloat(nozzleSpacingInput.value) / 2.54).toFixed(1);
+                boomHeightInput.value = (parseFloat(boomHeightInput.value) / 2.54).toFixed(1);
+            }
+
+            // Update UI to reflect the new units
+            currentUnits = units;
+            document.querySelectorAll('.spacing-unit').forEach(el => el.textContent = units);
+            document.querySelectorAll('.height-unit').forEach(el => el.textContent = units);
+            document.querySelectorAll('.output-width-unit').forEach(el => el.textContent = units);
+
+            // Update button styling
+            document.getElementById('units-in').classList.remove('active');
+            document.getElementById('units-cm').classList.remove('active');
+            document.getElementById(`units-${units}`).classList.add('active');
+
+            // Recalculate with new units
+            calculateSprayPattern();
+        }
+
+        // Function to calculate GPM based on selected nozzle size and operating pressure
+        function calculateAdjustedGPM(nozzleSize, operatingPressure) {
+            const gpmAt40PSI = gpmLookup40PSI[nozzleSize] || 0.3; // Default to 0.3 if nozzle size not explicitly in lookup
+
+            // Pressure Adjustment Factors
+            const pressureAdjustmentFactors = {
+                20: 0.71,
+                30: 0.87,
+                40: 1.00,
+                50: 1.12,
+                60: 1.22,
+                70: 1.32
+            };
+            const pressureFactor = pressureAdjustmentFactors[operatingPressure] || 1.0; // Default to 1.0 if not found
+
+            return gpmAt40PSI * pressureFactor;
+        }
+
+        // Main function to calculate spray pattern based on input parameters
+        function calculateSprayPattern() {
+            // Get input values
+            const nozzleSize = parseFloat(document.getElementById('nozzleSize').value);
+            const forwardAngle = parseFloat(document.getElementById('forwardAngle').value); // New input
+            const fanAngle = parseFloat(document.getElementById('fanAngle').value);
+            const nozzleSpacing = parseFloat(document.getElementById('nozzleSpacing').value);
+            const boomHeight = parseFloat(document.getElementById('boomHeight').value);
+            const operatingPressure = parseFloat(document.getElementById('operatingPressure').value);
+            const numNozzles = 5; // Fixed to 5 nozzles as requested
+
+            // Validate inputs
+            if (isNaN(fanAngle) || isNaN(nozzleSpacing) || isNaN(boomHeight) || isNaN(operatingPressure) || isNaN(forwardAngle) ||
+                fanAngle <= 0 || nozzleSpacing <= 0 || boomHeight <= 0 || operatingPressure <= 0) { 
+                
+                document.getElementById('calculatedSprayWidth').textContent = 'Error';
+                document.getElementById('calculatedOverlap').textContent = 'Error';
+                document.getElementById('visualizationOverlap').textContent = 'Overlap: Invalid Input';
+                
+                // Clear visualization on error
+                document.querySelector('.summary-card').innerHTML = '<p style="color: red; text-align: center;">Please enter valid spray parameters to get recommendations.</p>';
+                document.getElementById('sprayVisualization').innerHTML = '';
+                return;
+            }
+
+            // Convert inputs to a consistent unit (e.g., inches) for calculation if currentUnits is cm
+            let boomHeightForCalc = boomHeight;
+            let nozzleSpacingForCalc = nozzleSpacing;
+            if (currentUnits === 'cm') {
+                boomHeightForCalc = boomHeight / 2.54;
+                nozzleSpacingForCalc = nozzleSpacing / 2.54;
+            }
+
+            // Convert angles to radians
+            const forwardAngleRad = forwardAngle * Math.PI / 180;
+            const fanAngleRad = fanAngle * Math.PI / 180;
+
+            // Calculate spray width using the CORRECT formula provided by the user
+            // Spray Width = (Boom Height / COS(Forward Angle * PI()/180)) * TAN((Fan Angle/2) * PI()/180) * 2
+            const cosForwardAngle = Math.abs(Math.cos(forwardAngleRad));
+            // Add a small epsilon to prevent division by zero if cosForwardAngle is exactly 0 (e.g., for 90 degrees forward angle).
+            const calculatedSprayWidth = (boomHeightForCalc / (cosForwardAngle === 0 ? 0.0001 : cosForwardAngle)) * Math.tan(fanAngleRad / 2) * 2;
+            
+            // Overlap % = (Spray Width / Nozzle Spacing) * 100 - 100
+            const calculatedOverlap = (calculatedSprayWidth / nozzleSpacingForCalc) * 100 - 100;
+
+            // Convert calculated spray width back to current units for display
+            const displaySprayWidth = (currentUnits === 'cm') ? calculatedSprayWidth * 2.54 : calculatedSprayWidth;
+
+            // Limit extreme values for better display
+            const displayOverlap = Math.max(-100, Math.min(1000, calculatedOverlap)); // Cap for display
+
+            // Update results display
+            document.getElementById('calculatedSprayWidth').textContent = displaySprayWidth.toFixed(1);
+            document.getElementById('calculatedOverlap').textContent = displayOverlap.toFixed(1);
+            document.getElementById('visualizationOverlap').textContent = `Overlap: ${displayOverlap.toFixed(1)}%`;
+
+            // Pass original (current unit) values to visualization, and the calculated values
+            visualizeSprayPattern(displaySprayWidth, nozzleSpacing, fanAngle, boomHeight, numNozzles, displayOverlap);
+
+            // Update summary section, passing the calculated values
+            updateSummaryCard(nozzleSize, forwardAngle, fanAngle, nozzleSpacing, boomHeight, operatingPressure, displaySprayWidth, calculatedOverlap, currentUnits, nozzleSpacingForCalc);
+        }
+
+        // Function to visualize the spray pattern
+        function visualizeSprayPattern(displaySprayWidth, displayNozzleSpacing, fanAngleDegrees, displayBoomHeight, numNozzles, calculatedOverlap) {
+            const svg = document.getElementById('sprayVisualization');
+            svg.innerHTML = ''; // Clear previous visualization
+
+            const svgWidth = 900;
+            const svgHeight = 400;
+            const padding = 50; // Padding from SVG edges
+            const summaryTextHeight = 40; // Space for the summary text at the top
+
+            const groundY = svgHeight - padding; 
+            const scaledBoomHeight = displayBoomHeight * ((svgHeight - padding - summaryTextHeight) / displayBoomHeight); 
+            const boomY = groundY - scaledBoomHeight;
+            
+            // Determine the total real-world width needed for the visualization
+            const totalRealWorldSpan = (numNozzles - 1) * displayNozzleSpacing + displaySprayWidth; 
+            
+            // Calculate pixels per unit (e.g., pixels per inch or pixels per cm)
+            const pixelsPerUnit = (svgWidth - 2 * padding) / totalRealWorldSpan;
+
+            // Re-calculate scaledNozzleSpacing based on the new pixelsPerUnit
+            const scaledNozzleSpacing = displayNozzleSpacing * pixelsPerUnit;
+            
+            const boomThickness = 10; // Visual thickness of the boom
+
+            // Calculate the starting X position for the first nozzle to center the visualization
+            const totalScaledBoomLength = (numNozzles - 1) * scaledNozzleSpacing;
+            const startX = (svgWidth - totalScaledBoomLength) / 2;
+
+            // Draw Summary Text at the top of the SVG
+            const summaryGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            summaryGroup.setAttribute('class', 'svg-summary-text');
+            
+            let currentUnitsForSummary = currentUnits; 
+
+            const summaryLine1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            summaryLine1.setAttribute('x', padding);
+            summaryLine1.setAttribute('y', 20);
+            summaryLine1.textContent = `Height: ${displayBoomHeight.toFixed(1)}${currentUnitsForSummary}  Width: ${displaySprayWidth.toFixed(1)}${currentUnitsForSummary}`;
+            summaryGroup.appendChild(summaryLine1);
+
+            const summaryLine2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            summaryLine2.setAttribute('x', svgWidth / 2);
+            summaryLine2.setAttribute('y', 20);
+            summaryLine2.setAttribute('text-anchor', 'middle');
+            summaryLine2.textContent = `Nozzle Angle: ${fanAngleDegrees.toFixed(0)}°  Number: ${numNozzles}  Spacing: ${displayNozzleSpacing.toFixed(1)}${currentUnitsForSummary}`;
+            summaryGroup.appendChild(summaryLine2);
+
+            svg.appendChild(summaryGroup);
+
+
+            // Draw Ground
+            const ground = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            ground.setAttribute('x', 0);
+            ground.setAttribute('y', groundY);
+            ground.setAttribute('width', svgWidth);
+            ground.setAttribute('height', svgHeight - groundY); 
+            ground.setAttribute('class', 'ground');
+            svg.appendChild(ground);
+
+            // Draw Boom
+            const boom = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            boom.setAttribute('x', startX - scaledNozzleSpacing / 2); 
+            boom.setAttribute('y', boomY - boomThickness / 2);
+            boom.setAttribute('width', totalScaledBoomLength + scaledNozzleSpacing); 
+            boom.setAttribute('height', boomThickness);
+            boom.setAttribute('class', 'boom');
+            svg.appendChild(boom);
+            
+            const sprayData = []; // Store nozzleX, sprayLeftX, sprayRightX for each nozzle
+
+            // Calculate spray data for all nozzles first
+            for (let i = 0; i < numNozzles; i++) {
+                const nozzleX = startX + i * scaledNozzleSpacing;
+                const fanAngleRad = fanAngleDegrees * Math.PI / 180;
+                const sprayHalfWidthAtGround = scaledBoomHeight * Math.tan(fanAngleRad / 2);
+                const sprayLeftX = nozzleX - sprayHalfWidthAtGround;
+                const sprayRightX = nozzleX + sprayHalfWidthAtGround;
+                sprayData.push({ nozzleX, sprayLeftX, sprayRightX });
+            }
+
+            // Determine the plant's position (center of the SVG visualization)
+            const plantX = svgWidth / 2;
+
+            // Draw filled spray patterns for nozzles that cover the plant
+            sprayData.forEach(spray => {
+                // Check if the plant's X coordinate falls within the spray pattern's ground coverage
+                if (plantX >= spray.sprayLeftX && plantX <= spray.sprayRightX) {
+                    const sprayFillPolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    sprayFillPolygon.setAttribute('points', `${spray.nozzleX},${boomY} ${spray.sprayLeftX},${groundY} ${spray.sprayRightX},${groundY}`);
+                    sprayFillPolygon.setAttribute('class', 'spray-overlap-highlight');
+                    svg.appendChild(sprayFillPolygon);
+                }
+            });
+
+
+            // Draw nozzle bodies, numbers, and dashed outlines for all nozzles
+            sprayData.forEach((spray, i) => {
+                // Draw Nozzle Body
+                const nozzleBody = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                nozzleBody.setAttribute('cx', spray.nozzleX);
+                nozzleBody.setAttribute('cy', boomY);
+                nozzleBody.setAttribute('r', 6); 
+                nozzleBody.setAttribute('class', 'nozzle-body');
+                svg.appendChild(nozzleBody);
+
+                // Draw Nozzle Number
+                const nozzleNumberText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                nozzleNumberText.setAttribute('x', spray.nozzleX);
+                nozzleNumberText.setAttribute('y', boomY + 20); 
+                nozzleNumberText.textContent = (i + 1).toString();
+                nozzleNumberText.setAttribute('class', 'nozzle-number');
+                svg.appendChild(nozzleNumberText);
+
+                // Draw the individual spray pattern (dashed outline)
+                const sprayOutlinePolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                sprayOutlinePolygon.setAttribute('points', `${spray.nozzleX},${boomY} ${spray.sprayLeftX},${groundY} ${spray.sprayRightX},${groundY}`);
+                sprayOutlinePolygon.setAttribute('class', 'spray-pattern'); // This class has dashed stroke
+                svg.appendChild(sprayOutlinePolygon);
+            });
+
+            // Draw a single, larger plant in the middle of the visualization
+            const centerPlantX = svgWidth / 2;
+            drawPlant(svg, centerPlantX, groundY, 1.5); 
+        }
+
+        // Function to draw a simple plant SVG
+        function drawPlant(svgElement, x, y, scale = 0.6) { // Added scale parameter
+            const plantGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            plantGroup.setAttribute('transform', `translate(${x}, ${y}) scale(${scale})`); // Use scale parameter
+
+            // Stem
+            const stem = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            stem.setAttribute('x', -2);
+            stem.setAttribute('y', -20);
+            stem.setAttribute('width', 4);
+            stem.setAttribute('height', 20);
+            stem.setAttribute('class', 'plant-stem');
+            plantGroup.appendChild(stem);
+
+            // Left leaf
+            const leaf1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            leaf1.setAttribute('d', 'M-2 -15 Q-10 -25 -2 -30 Q5 -25 2 -15 Z'); // Corrected path to make it symmetrical
+            leaf1.setAttribute('class', 'plant-leaf');
+            plantGroup.appendChild(leaf1);
+
+            // Right leaf
+            const leaf2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            leaf2.setAttribute('d', 'M2 -15 Q10 -25 2 -30 Q-5 -25 -2 -15 Z'); // Corrected path to make it symmetrical
+            leaf2.setAttribute('class', 'plant-leaf');
+            plantGroup.appendChild(leaf2);
+
+            svgElement.appendChild(plantGroup); // Append directly since it's a single plant
+        }
+
+        // Function to get application volume category
+        function getApplicationCategory(gpa) {
+            if (gpa < 5) return 'Ultra Low Volume';
+            if (gpa >= 5 && gpa <= 10) return 'Very Low Volume';
+            if (gpa > 10 && gpa <= 20) return 'Low Volume';
+            if (gpa > 20 && gpa <= 30) return 'Standard Volume';
+            if (gpa > 30 && gpa <= 50) return 'High Volume';
+            return 'Very High Volume'; // gpa > 50
+        }
+
+        // Function to update the summary card with current values
+        function updateSummaryCard(nozzleSize, forwardAngle, fanAngle, nozzleSpacing, boomHeight, operatingPressure, calculatedSprayWidth, calculatedOverlap, currentUnits, nozzleSpacingInches) {
+            const summaryCardElement = document.getElementById('summaryCard');
+
+            // Convert values to inches for consistent calculations, then convert back for display where needed
+            const boomHeightInches = (currentUnits === 'cm') ? boomHeight / 2.54 : boomHeight;
+            const forwardAngleRadians = forwardAngle * Math.PI / 180; // New
+            const fanAngleRadians = fanAngle * Math.PI / 180;
+
+            // 1. OVERLAP STATUS
+            let overlapStatusIcon = '';
+            let overlapStatusText = '';
+            if (calculatedOverlap < 0) {
+                overlapStatusIcon = '<span class="status-icon status-red">❌</span>';
+                overlapStatusText = 'Gaps in Coverage';
+            } else if (calculatedOverlap >= 0 && calculatedOverlap < 30) {
+                overlapStatusIcon = '<span class="status-icon status-yellow">⚠️</span>';
+                overlapStatusText = 'Low Overlap';
+            } else if (calculatedOverlap >= 30 && calculatedOverlap <= 50) {
+                overlapStatusIcon = '<span class="status-icon status-green">✓</span>';
+                overlapStatusText = 'Optimal Overlap';
+            } else if (calculatedOverlap > 50) {
+                overlapStatusIcon = '<span class="status-icon status-yellow">⚠️</span>';
+                overlapStatusText = 'High Overlap';
+            }
+
+            // 2. DRIFT RISK
+            let driftRisk = 'Low';
+            let driftStatusIcon = '<span class="status-icon status-green">✓</span>';
+            const boomHeightToSpacingRatio = boomHeightInches / nozzleSpacingInches;
+
+            // Drift Factors
+            const pressureAdjustmentFactors = {
+                20: 0.8, 30: 0.9, 40: 1.0, 50: 1.1, 60: 1.2, 70: 1.3
+            };
+            let pressureFactor = pressureAdjustmentFactors[operatingPressure] || 1.0;
+
+            let nozzleSizeFactor = 1.0;
+            if (nozzleSize >= 0.1 && nozzleSize <= 0.2) {
+                nozzleSizeFactor = 1.5; // Finer droplets, higher risk
+            } else if (nozzleSize > 0.4) {
+                nozzleSizeFactor = 0.8; // Coarser droplets, lower risk
+            }
+
+            let fanAngleFactor = 1.0;
+            if (fanAngle > 100) {
+                fanAngleFactor = 1.1;
+            } else if (fanAngle < 90) {
+                fanAngleFactor = 0.9;
+            }
+
+            const driftRiskIndex = boomHeightToSpacingRatio * pressureFactor * nozzleSizeFactor * fanAngleFactor;
+
+            if (driftRiskIndex >= 1.5) {
+                driftRisk = 'High';
+                driftStatusIcon = '<span class="status-icon status-red">❌</span>';
+            } else if (driftRiskIndex >= 0.8) {
+                driftRisk = 'Moderate';
+                driftStatusIcon = '<span class="status-icon status-yellow">⚠️</span>';
+            } else {
+                driftRisk = 'Low';
+                driftStatusIcon = '<span class="status-icon status-green">✓</span>';
+            }
+
+            // 3. APPLICATION RATE APPROPRIATENESS & RECOMMENDED SPEED
+            const adjustedGPM = calculateAdjustedGPM(nozzleSize, operatingPressure);
+            
+            // Calculate recommended speed range for a target GPA (e.g., 15-25 GPA for general applications)
+            const targetGPALow = 15;
+            const targetGPAHigh = 25;
+            let recommendedSpeedLow = (adjustedGPM * 5940) / (targetGPAHigh * nozzleSpacingInches);
+            let recommendedSpeedHigh = (adjustedGPM * 5940) / (targetGPALow * nozzleSpacingInches);
+
+            // Ensure low is always lower than high
+            if (recommendedSpeedLow > recommendedSpeedHigh) {
+                [recommendedSpeedLow, recommendedSpeedHigh] = [recommendedSpeedHigh, recommendedSpeedLow];
+            }
+
+            // Heuristic for Application Rate Appropriateness
+            let appRateStatusIcon = '<span class="status-icon status-green">✓</span>';
+            let appRateStatusText = 'Good Flow Rate';
+            
+            // Calculate GPA at a common speed (e.g., 10 MPH) for a quick check
+            const gpaAt10MPH = (adjustedGPM * 5940) / (10 * nozzleSpacingInches);
+
+            if (gpaAt10MPH < 5 || gpaAt10MPH > 50) { // Ultra Low or Very High
+                appRateStatusIcon = '<span class="status-icon status-red">❌</span>';
+                appRateStatusText = 'Rate May Be Inappropriate';
+            } else if (gpaAt10MPH < 10 || gpaAt10MPH > 30) { // Very Low or High
+                appRateStatusIcon = '<span class="status-icon status-yellow">⚠️</span>';
+                appRateStatusText = 'Rate Needs Review';
+            }
+
+            // 4. PRIMARY RECOMMENDATIONS
+            let recommendations = [];
+
+            // Overlap recommendation
+            const optimalOverlapTarget = 40;
+            // Optimal Boom Height = (Nozzle Spacing * 1.4 * COS(Forward Angle * PI()/180)) / (TAN((Fan Angle/2) * PI()/180) * 2)
+            const cosForwardAngleForOptimal = Math.abs(Math.cos(forwardAngleRadians));
+            const tanHalfFanAngle = Math.tan(fanAngleRadians / 2);
+            const recommendedBoomHeightInches = (nozzleSpacingInches * (1 + optimalOverlapTarget / 100) * (cosForwardAngleForOptimal === 0 ? 0.0001 : cosForwardAngleForOptimal)) / ((tanHalfFanAngle === 0 ? 0.0001 : tanHalfFanAngle) * 2);
+
+            const recommendedBoomHeightDisplay = (currentUnits === 'cm') ? (recommendedBoomHeightInches * 2.54).toFixed(1) : recommendedBoomHeightInches.toFixed(1);
+
+            if (calculatedOverlap < 30) {
+                recommendations.push(`Increase boom height to approx. <strong>${recommendedBoomHeightDisplay} ${currentUnits}</strong> to achieve optimal overlap.`);
+            } else if (calculatedOverlap > 50) {
+                recommendations.push(`Decrease boom height to approx. <strong>${recommendedBoomHeightDisplay} ${currentUnits}</strong> to achieve optimal overlap.`);
+            } else {
+                recommendations.push(`Maintain current boom height of <strong>${boomHeight.toFixed(1)} ${currentUnits}</strong> for optimal overlap.`);
+            }
+
+            // Drift risk recommendation
+            if (driftRisk === 'High') {
+                recommendations.push(`Reduce operating pressure (e.g., to <strong>${(operatingPressure * 0.75).toFixed(0)} PSI</strong>) or use larger nozzles to mitigate drift.`);
+            } else if (driftRisk === 'Moderate') {
+                recommendations.push(`Consider slightly reducing pressure (e.g., to <strong>${(operatingPressure * 0.9).toFixed(0)} PSI</strong>) and be mindful of wind conditions to reduce drift.`);
+            } else {
+                recommendations.push(`Your current setup has a low drift risk. Continue to follow best practices.`);
+            }
+
+            // Best application speed for target volume
+            recommendations.push(`Optimal speed range for general applications: <strong>${recommendedSpeedLow.toFixed(1)}-${recommendedSpeedHigh.toFixed(1)} MPH</strong>.`);
+
+            // Most compatible application type
+            const nozzleRec = nozzleSpecificRecommendations[nozzleSize.toString()] || {};
+            recommendations.push(`Most compatible application type: <strong>${nozzleRec.compatibleProducts || 'General agricultural sprays.'}</strong>`);
+
+
+            let summaryContent = `
+                <h2>Summary Analysis</h2>
+                <div class="summary-metrics">
+                    <div class="summary-metric-item">
+                        <div class="summary-metric-value">
+                            ${overlapStatusIcon}
+                            Overlap: ${calculatedOverlap.toFixed(1)}%
+                            <span class="info-button">i<span class="tooltip">Percentage of spray pattern that overlaps with adjacent nozzles. Ideal is 30-50%.</span></span>
+                        </div>
+                        <div class="summary-metric-label">${overlapStatusText}</div>
+                    </div>
+                    <div class="summary-metric-item">
+                        <div class="summary-metric-value">
+                            ${driftStatusIcon}
+                            Drift Risk: ${driftRisk}
+                            <span class="info-button">i<span class="tooltip">Assessment based on boom height, pressure, nozzle size, and fan angle.</span></span>
+                        </div>
+                        <div class="summary-metric-label">Index: ${driftRiskIndex.toFixed(2)}</div>
+                    </div>
+                    <div class="summary-metric-item">
+                        <div class="summary-metric-value">
+                            ${appRateStatusIcon}
+                            Flow Rate: ${adjustedGPM.toFixed(2)} GPM
+                            <span class="info-button">i<span class="tooltip">Gallons Per Minute (GPM) adjusted for selected pressure.</span></span>
+                        </div>
+                        <div class="summary-metric-label">${appRateStatusText}</div>
+                    </div>
+                    <div class="summary-metric-item">
+                        <div class="summary-metric-value">
+                            Recommended Speed: ${recommendedSpeedLow.toFixed(1)}-${recommendedSpeedHigh.toFixed(1)} MPH
+                            <span class="info-button">i<span class="tooltip">Speed range for optimal application rate (targeting 15-25 GPA).</span></span>
+                        </div>
+                        <div class="stat-label">For general applications</div>
+                    </div>
+                </div>
+
+                <div class="summary-recommendations">
+                    <h3>Key Recommendations</h3>
+                    <ul>
+                        ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="summary-buttons">
+                    <button id="viewDetailedCalculationsButton">View Detailed Calculations</button>
+                    <button id="viewApplicationRateTableButton">View Application Rate Table</button>
+                </div>
+            `;
+            summaryCardElement.innerHTML = summaryContent;
+
+            // Add event listener for the new "View Detailed Calculations" button inside the summary card
+            document.getElementById('viewDetailedCalculationsButton').addEventListener('click', function() {
+                document.getElementById('detailedCalculationsOverlay').style.display = 'flex';
+            });
+        }
+
+        // Function to update the Application Rate Table modal
+        function updateApplicationRateTableModal() {
+            const nozzleSize = parseFloat(document.getElementById('nozzleSize').value);
+            const operatingPressure = parseFloat(document.getElementById('operatingPressure').value);
+            const nozzleSpacing = parseFloat(document.getElementById('nozzleSpacing').value);
+            const nozzleSpacingInches = (currentUnits === 'cm') ? nozzleSpacing / 2.54 : nozzleSpacing;
+
+            const adjustedGPM = calculateAdjustedGPM(nozzleSize, operatingPressure);
+            const speeds = [3, 5, 7.5, 10, 12, 15];
+
+            let tableHTML = `
+                <table class="application-rate-table">
+                    <thead>
+                        <tr>
+                            <th>Speed (MPH)</th>
+                            <th>Calculated GPA</th>
+                            <th>Application Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            speeds.forEach(speed => {
+                const gpa = (adjustedGPM * 5940) / (speed * nozzleSpacingInches);
+                const category = getApplicationCategory(gpa);
+                let highlightStyle = '';
+
+                // Highlighting based on common application targets
+                if (gpa >= 10 && gpa <= 15) { // Systemic herbicides
+                    highlightStyle = 'background-color: #d4edda;'; /* Light green */
+                } else if (gpa > 15 && gpa <= 20) { // Contact herbicides
+                    highlightStyle = 'background-color: #d1ecf1;'; /* Light blue */
+                } else if (gpa > 20 && gpa <= 30) { // Fungicides
+                    highlightStyle = 'background-color: #fff3cd;'; /* Light yellow */
+                } else if (gpa > 30) { // Insecticides (often 20+ but can be higher)
+                    highlightStyle = 'background-color: #f8d7da;'; /* Light red */
+                }
+
+                tableHTML += `
+                    <tr style="${highlightStyle}">
+                        <td>${speed}</td>
+                        <td>${gpa.toFixed(2)}</td>
+                        <td>${category}</td>
+                    </tr>
+                `;
+            });
+            tableHTML += `
+                    </tbody>
+                </table>
+                <p><strong>Optimal Speed Range Notes:</strong></p>
+                <ul>
+                    <li><strong>Systemic herbicides:</strong> Often effective at 10-15 GPA</li>
+                    <li><strong>Contact herbicides:</strong> Often need 15-20 GPA</li>
+                    <li><strong>Fungicides:</strong> Often require 20-30 GPA</li>
+                    <li><strong>Insecticides:</strong> Often most effective at 20+ GPA</li>
+                </ul>
+                <p><strong>Note on Speed:</strong> Changing your speed significantly affects the application rate. Higher speeds lead to lower GPA, potentially reducing coverage quality and increasing drift due to increased turbulence. Lower speeds increase GPA, improving coverage but potentially reducing application efficiency and increasing costs. Always aim for a consistent, appropriate speed for your target application rate.</p>
+            `;
+            document.getElementById('applicationRateTableContent').innerHTML = tableHTML;
+        }
+    </script>
+</body>
+</html>
